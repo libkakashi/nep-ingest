@@ -1,0 +1,68 @@
+{
+  "name": "nep",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "gts lint",
+    "clean": "gts clean",
+    "fix": "gts fix",
+    "posttest": "npm run lint"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^1.2.12",
+    "@ai-sdk/google": "^1.2.22",
+    "@ai-sdk/groq": "^1.2.9",
+    "@ai-sdk/openai": "^1.3.23",
+    "@radix-ui/react-select": "^2.2.5",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@shopify/admin-api-client": "^1.1.0",
+    "@t3-oss/env-nextjs": "^0.12.0",
+    "@tanstack/react-query": "^5.69.0",
+    "@trpc/client": "^11.0.0",
+    "@trpc/react-query": "^11.0.0",
+    "@trpc/server": "^11.0.0",
+    "@types/marked": "^5.0.2",
+    "ai": "^4.3.17",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "jju": "^1.4.0",
+    "lucide-react": "^0.525.0",
+    "marked": "^16.0.0",
+    "next": "^15.2.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "server-only": "^0.0.1",
+    "superjson": "^2.2.1",
+    "superqueue": "github:libkakashi/superqueue",
+    "tailwind-merge": "^3.3.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@tailwindcss/postcss": "^4.0.15",
+    "@types/jju": "^1.4.5",
+    "@types/node": "^22.7.5",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "8",
+    "eslint-config-next": "15.3.3",
+    "gts": "^6.0.2",
+    "postcss": "^8.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.11",
+    "tailwindcss": "^4.0.15",
+    "tw-animate-css": "^1.3.5",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.27.0"
+  },
+  "ct3aMetadata": {
+    "initVersion": "7.39.3"
+  },
+  "engines": {
+    "node": ">=20",
+    "bun": ">=1"
+  }
+}
