@@ -6,7 +6,6 @@ import {
 import {marked} from 'marked';
 import {Product} from './products';
 import {BinaryFile, binaryToFile} from './image-compression';
-import {env} from '../env';
 
 const handleErrors = (errors: ClientResponse['errors']) => {
   if (errors) {
