@@ -2,17 +2,15 @@ import {ClientResponse, createAdminApiClient} from '@shopify/admin-api-client';
 import {marked} from 'marked';
 import {Product} from './products';
 import {BinaryFile, binaryToFile} from './image-compression';
+import {env} from '../env';
 
-if (
-  !process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN ||
-  !process.env.SHOPIFY_ACCESS_TOKEN
-) {
+if (!env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN || !env.SHOPIFY_ACCESS_TOKEN) {
   throw new Error('Missing Shopify environment variables');
 }
 
 const client = createAdminApiClient({
-  storeDomain: process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN!,
-  accessToken: process.env.SHOPIFY_ACCESS_TOKEN!,
+  storeDomain: env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN,
+  accessToken: env.SHOPIFY_ACCESS_TOKEN,
   apiVersion: '2024-10',
 });
 
