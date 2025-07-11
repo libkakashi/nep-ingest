@@ -1,18 +1,12 @@
-import {ClientResponse, createAdminApiClient} from '@shopify/admin-api-client';
+import {
+  AdminApiClient,
+  ClientResponse,
+  createAdminApiClient,
+} from '@shopify/admin-api-client';
 import {marked} from 'marked';
 import {Product} from './products';
 import {BinaryFile, binaryToFile} from './image-compression';
 import {env} from '../env';
-
-if (!env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN || !env.SHOPIFY_ACCESS_TOKEN) {
-  throw new Error('Missing Shopify environment variables');
-}
-
-const client = createAdminApiClient({
-  storeDomain: env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN,
-  accessToken: env.SHOPIFY_ACCESS_TOKEN,
-  apiVersion: '2024-10',
-});
 
 const handleErrors = (errors: ClientResponse['errors']) => {
   if (errors) {
@@ -50,8 +44,28 @@ export const convertMarkdownToHtml = (markdown: string): string => {
   return html;
 };
 
-const getPrimaryLocation = async () => {
-  const query = `
+const getClient = (() => {
+  let client: AdminApiClient | null = null;
+
+  return () => {
+    if (client) return client;
+
+    client = createAdminApiClient({
+      storeDomain: env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN,
+      accessToken: env.SHOPIFY_ACCESS_TOKEN,
+      apiVersion: '2024-10',
+    });
+    return client;
+  };
+})();
+
+const getPrimaryLocation = (() => {
+  let locationId: string | null = null;
+
+  return async () => {
+    if (locationId) return locationId;
+
+    const query = `
     query {
       locations(first: 1) {
         edges {
@@ -64,20 +78,15 @@ const getPrimaryLocation = async () => {
       }
     }
   `;
-  const res = await client.request(query);
-  handleErrors(res.errors);
+    const res = await getClient().request(query);
+    handleErrors(res.errors);
 
-  const locationId = res.data?.locations?.edges?.[0]?.node?.id;
+    locationId = res.data?.locations?.edges?.[0]?.node?.id;
 
-  if (!locationId) {
-    throw new Error('No primary location found');
-  }
-  return locationId;
-};
-
-let locationId: string | null = null;
-let collectionsCache: {id: string; title: string; handle: string}[] | null =
-  null;
+    if (!locationId) throw new Error('No primary location found');
+    return locationId;
+  };
+})();
 
 const createStagedUpload = async (file: BinaryFile, filename: string) => {
   const stagedUploadMutation = `
@@ -110,7 +119,7 @@ const createStagedUpload = async (file: BinaryFile, filename: string) => {
     ],
   };
 
-  const res = await client.request(stagedUploadMutation, {
+  const res = await getClient().request(stagedUploadMutation, {
     variables: stagedUploadVariables,
   });
   handleErrors(res.errors);
@@ -189,7 +198,7 @@ const attachImageToProduct = async (productId: string, resourceUrl: string) => {
   };
   console.log('Attaching image to product:', productId, resourceUrl);
 
-  const res = await client.request(mutation, {variables});
+  const res = await getClient().request(mutation, {variables});
   handleErrors(res.errors);
 
   return res.data?.productUpdate?.product?.media?.nodes?.[0];
@@ -221,7 +230,7 @@ const createSingleProduct = async (productData: Product) => {
     },
   };
 
-  const res = await client.request(mutation, {variables});
+  const res = await getClient().request(mutation, {variables});
   handleErrors(res.errors);
 
   if (res.data?.productCreate?.userErrors?.length > 0) {
@@ -242,10 +251,14 @@ const createSingleProduct = async (productData: Product) => {
 
 let onlineStorePublicationId: string | null = null;
 
-const getAllCollections = async () => {
-  if (collectionsCache) return collectionsCache;
+const getAllCollections = (() => {
+  let collectionsCache: {id: string; title: string; handle: string}[] | null =
+    null;
 
-  const query = `
+  return async () => {
+    if (collectionsCache) return collectionsCache;
+
+    const query = `
     query {
       collections(first: 50) {
         edges {
@@ -258,15 +271,16 @@ const getAllCollections = async () => {
       }
     }
   `;
-  const res = await client.request(query);
-  handleErrors(res.errors);
+    const res = await getClient().request(query);
+    handleErrors(res.errors);
 
-  const collections =
-    res.data?.collections?.edges?.map((edge: any) => edge.node) || [];
+    const collections =
+      res.data?.collections?.edges?.map((edge: any) => edge.node) || [];
 
-  collectionsCache = collections;
-  return collections;
-};
+    collectionsCache = collections;
+    return collections;
+  };
+})();
 
 const findCollectionByCategory = async (category: string) => {
   const collections = await getAllCollections();
@@ -322,7 +336,7 @@ const addProductToCollection = async (productId: string, category: string) => {
 
   const variables = {id: collectionId, productIds: [productId]};
 
-  const res = await client.request(mutation, {variables});
+  const res = await getClient().request(mutation, {variables});
   handleErrors(res.errors);
 
   if (res.data?.collectionAddProducts?.userErrors?.length > 0) {
@@ -359,7 +373,7 @@ const getOnlineStorePublicationId = async () => {
     }
   `;
 
-  const res = await client.request(query);
+  const res = await getClient().request(query);
   handleErrors(res.errors);
 
   const publications = res.data?.publications?.edges;
@@ -394,7 +408,7 @@ const publishProductToOnlineStore = async (productId: string) => {
   `;
   const variables = {id: productId, input: [{publicationId: publicationId}]};
 
-  const res = await client.request(mutation, {variables});
+  const res = await getClient().request(mutation, {variables});
   handleErrors(res.errors);
 
   if (res.data?.publishablePublish?.userErrors?.length > 0) {
@@ -451,7 +465,7 @@ const createProductOptions = async (productId: string) => {
     ],
   };
 
-  const res = await client.request(mutation, {variables});
+  const res = await getClient().request(mutation, {variables});
   handleErrors(res.errors);
 
   if (res.data?.productOptionsCreate?.userErrors?.length > 0) {
@@ -488,7 +502,7 @@ const updateProductVariant = async (productId: string, price: number) => {
     }
   `;
 
-  const getVariantsRes = await client.request(getVariantsQuery, {
+  const getVariantsRes = await getClient().request(getVariantsQuery, {
     variables: {productId},
   });
   handleErrors(getVariantsRes.errors);
@@ -530,7 +544,7 @@ const updateProductVariant = async (productId: string, price: number) => {
     ],
   };
 
-  const res = await client.request(mutation, {variables});
+  const res = await getClient().request(mutation, {variables});
   handleErrors(res.errors);
 
   if (res.data?.productVariantsBulkUpdate?.userErrors?.length > 0) {
@@ -568,13 +582,12 @@ const updateProductVariant = async (productId: string, price: number) => {
 
     // Set inventory level
     console.log('Setting inventory level to 1...');
-    if (!locationId) {
-      locationId = await getPrimaryLocation();
-      console.log('Found location id:', locationId);
-    }
+
+    const locationId = await getPrimaryLocation();
+
     const adjustmentGroup = await setInventoryLevel(
       variant.inventoryItem.id,
-      locationId!,
+      locationId,
       1,
     );
     console.log('Inventory level set result:', adjustmentGroup);
@@ -607,7 +620,7 @@ const updateInventoryTracking = async (inventoryItemId: string) => {
     'Updating inventory tracking with variables:',
     JSON.stringify(variables, null, 2),
   );
-  const res = await client.request(mutation, {variables});
+  const res = await getClient().request(mutation, {variables});
   handleErrors(res.errors);
 
   console.log(
@@ -655,7 +668,7 @@ const setInventoryLevel = async (
     },
   };
 
-  const res = await client.request(mutation, {variables});
+  const res = await getClient().request(mutation, {variables});
   handleErrors(res.errors);
 
   console.log(
