@@ -59,7 +59,7 @@ Create a `.env.local` file in the root directory with the following variables:
 
 ```env
 # Shopify Configuration
-SHOPIFY_STORE_URL=your-store.myshopify.com
+NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN=your-store.myshopify.com
 SHOPIFY_ACCESS_TOKEN=your-admin-api-token
 
 # AI Service API Keys (configure at least one)
