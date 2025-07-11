@@ -51,7 +51,7 @@ const getClient = (() => {
     if (client) return client;
 
     client = createAdminApiClient({
-      storeDomain: env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN,
+      storeDomain: env.SHOPIFY_STORE_DOMAIN,
       accessToken: env.SHOPIFY_ACCESS_TOKEN,
       apiVersion: '2024-10',
     });

@@ -4,6 +4,7 @@ import {z} from 'zod';
 export const env = createEnv({
   server: {
     NODE_ENV: z.enum(['development', 'test', 'production']),
+    SHOPIFY_STORE_DOMAIN: z.string(),
     SHOPIFY_ACCESS_TOKEN: z.string(),
     OPENAI_API_KEY: z.string().optional(),
     ANTHROPIC_API_KEY: z.string().optional(),
