@@ -135,7 +135,12 @@ export function ProductCard({product, onUpdate}: ProductCardProps) {
               </label>
               <Select
                 defaultValue={product.category}
-                onValueChange={value => onUpdate({...product, category: value})}
+                onValueChange={value =>
+                  onUpdate({
+                    ...product,
+                    category: value as 'midi' | 'mini' | 'top',
+                  })
+                }
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select category" />

@@ -38,29 +38,15 @@ const handleErrors = (errors: ClientResponse['errors']) => {
 export const convertMarkdownToHtml = (markdown: string): string => {
   if (!markdown) return '';
 
-  // Configure marked with Shopify-compatible options
-  marked.setOptions({
-    breaks: true, // Convert line breaks to <br>
-    gfm: true, // Enable GitHub Flavored Markdown
-    sanitize: false, // We'll handle sanitization ourselves
-    smartLists: true,
-    smartypants: false, // Disable smart quotes to avoid encoding issues
-  });
+  marked.setOptions({breaks: true, gfm: true});
 
-  // Convert markdown to HTML
   let html = marked(markdown) as string;
 
-  // Clean up and ensure Shopify compatibility
   html = html
-    // Remove any script tags for security
     .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-    // Remove any style tags (Shopify themes handle styling)
     .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-    // Remove any dangerous attributes
     .replace(/\s(on\w+)="[^"]*"/gi, '')
-    // Ensure proper paragraph spacing
     .replace(/\n\s*\n/g, '\n')
-    // Clean up extra whitespace
     .trim();
 
   return html;
