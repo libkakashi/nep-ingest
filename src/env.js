@@ -11,14 +11,11 @@ export const env = createEnv({
     GROQ_API_KEY: z.string().optional(),
   },
 
-  client: {
-    NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN: z.string(),
-  },
+  client: {},
 
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
-    NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN:
-      process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN,
+    SHOPIFY_STORE_DOMAIN: process.env.SHOPIFY_STORE_DOMAIN,
     SHOPIFY_ACCESS_TOKEN: process.env.SHOPIFY_ACCESS_TOKEN,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
