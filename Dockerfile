@@ -7,7 +7,6 @@ RUN bun install --frozen-lockfile
 
 # Copy source code and env file
 COPY . .
-COPY .env .env
 
 # Build the application
 ENV SKIP_ENV_VALIDATION=true
